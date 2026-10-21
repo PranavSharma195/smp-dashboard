@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load smp %}
+{% block content %}
+<div class="page-head" data-reveal><div><span class="eyebrow">Methodology</span><h1>How scores and data work</h1></div></div>
+<div class="detail-grid">
+  <div class="stack">
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Viability score (0–100)</h2></div>
+      <p>{{ disclaimer }}</p>
+      <p style="margin-top:10px">Each factor becomes a 0–100 sub-score, then weights combine them:</p>
+      <ul style="line-height:1.8">
+        <li><b>Demand</b>: the stored trend score.</li>
+        <li><b>Margin</b>: 0 at ≤0%, full marks at 60% gross margin.</li>
+        <li><b>Investment</b>: full marks at Rs. 5,000 total, zero at Rs. 1,00,000.</li>
+        <li><b>Competition</b>: low 100, medium 60, high 25.</li>
+        <li><b>MOQ</b>: full marks at ≤20 units, zero at ≥500.</li>
+        <li><b>Sourcing complexity</b>: low 100, medium 65, high 30.</li>
+        <li><b>Confidence</b>: high 100, medium 65, low 30.</li>
+      </ul>
+    </section>
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Calculations</h2></div>
+      <p>Landed total = product cost + shipping + insurance/handling + estimated duties &amp; taxes + other. Duties are charged on product + shipping + insurance. Gross profit = selling price − landed cost per unit. Margin = profit ÷ selling price.</p>
+      <p style="margin-top:10px"><b>Gross profit is not net profit.</b> Advertising, platform fees, storage, returns, delivery and staff costs reduce actual earnings. Duty rates are user-set estimates, not verified customs rates.</p>
+    </section>
+  </div>
+  <aside class="stack">
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Current weights</h2></div>
+      {% for k, v in weights %}<div class="score-row"><div class="score-top"><span>{{ k }}</span><span>{{ v }}%</span></div><div class="bar"><i data-bar="{{ v }}"></i></div></div>{% endfor %}
+    </section>
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Data source adapters</h2></div>
+      {% for a in adapters %}<div class="kv-row"><dt>{{ a.label }}</dt><dd><span class="badge {% if a.implemented %}badge-verified{% endif %}">{% if a.implemented %}ready{% else %}planned{% endif %}</span></dd></div>{% endfor %}
+      <p class="muted" style="font-size:12.5px;margin-top:10px">Only use sources whose terms permit it. See the README.</p>
+    </section>
+  </aside>
+</div>
+{% endblock %}

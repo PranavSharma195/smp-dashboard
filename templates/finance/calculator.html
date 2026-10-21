@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static smp %}
+{% block content %}
+<div class="page-head" data-reveal><div><span class="eyebrow">Calculator</span><h1>Import cost calculator</h1><p>Change any input and the results update instantly.</p></div><button class="btn btn-ghost" type="button" data-calc-reset>Reset to defaults</button></div>
+<div class="calc">
+  <form class="card card-pad" data-calc-form data-api="{% url 'finance:api' %}" data-reveal>
+    <div class="form-grid">
+      <label class="field">Supplier price per unit (CNY)<input type="number" step="0.01" min="0" name="unit_price_cny" value="{{ values.unit_price_cny }}" data-default="12"></label>
+      <label class="field">Exchange rate (NPR per CNY)<input type="number" step="0.0001" min="0" name="fx_rate" value="{{ values.fx_rate }}" data-default="{{ default_fx }}"><small>Illustrative, not live. Enter today's rate.</small></label>
+      <label class="field">Quantity (units)<input type="number" step="1" min="1" name="quantity" value="{{ values.quantity }}" data-default="100"></label>
+      <label class="field">Expected selling price in Nepal (NPR per unit)<input type="number" step="1" min="0" name="selling_price_npr" value="{{ values.selling_price_npr }}" data-default="700"></label>
+      <label class="field">International shipping (NPR, total)<input type="number" step="1" min="0" name="shipping_npr" value="{{ values.shipping_npr }}" data-default="5000"></label>
+      <label class="field">Insurance &amp; handling (NPR, total)<input type="number" step="1" min="0" name="insurance_handling_npr" value="{{ values.insurance_handling_npr }}" data-default="800"></label>
+      <label class="field">Customs duty &amp; taxes (%)<input type="number" step="0.1" min="0" name="duty_rate_pct" value="{{ values.duty_rate_pct }}" data-default="{{ default_duty|default:'15' }}"><small>Applied to product + shipping + insurance. An estimate to verify.</small></label>
+      <label class="field">Other expenses (NPR, total)<input type="number" step="1" min="0" name="other_expenses_npr" value="{{ values.other_expenses_npr }}" data-default="1000"></label>
+    </div>
+    <div class="notice info" style="margin-top:18px">{% icon "info" %}<span>{{ duty_note }}</span></div>
+  </form>
+  <div class="stack fade-swap" data-calc-out>
+    <div class="result-errors" data-calc-errors hidden></div>
+    <div class="notice" data-calc-offline hidden>{% icon "alert" %}<span>Server unreachable; showing a local estimate using the same formulas.</span></div>
+    <div class="big-result"><span class="k">Total investment (landed)</span><span class="v" data-out="landed_total">—</span></div>
+    <div class="card card-pad">
+      <div class="stackbar" aria-hidden="true"><i class="seg-0" data-seg></i><i class="seg-1" data-seg></i><i class="seg-2" data-seg></i><i class="seg-3" data-seg></i></div>
+      <dl class="kv">
+        <div class="kv-row"><dt><span class="legend-dot" style="display:inline-block;background:var(--brand)"></span> Product cost</dt><dd data-out="purchase_cost">—</dd></div>
+        <div class="kv-row"><dt><span class="legend-dot" style="display:inline-block;background:var(--saffron)"></span> International shipping</dt><dd data-out="shipping">—</dd></div>
+        <div class="kv-row"><dt><span class="legend-dot" style="display:inline-block;background:var(--saffron)"></span> Insurance &amp; handling</dt><dd data-out="insurance_handling">—</dd></div>
+        <div class="kv-row"><dt><span class="legend-dot" style="display:inline-block;background:var(--indigo)"></span> Duties &amp; taxes (est.)</dt><dd data-out="duties_taxes">—</dd></div>
+        <div class="kv-row"><dt><span class="legend-dot" style="display:inline-block;background:var(--crimson)"></span> Other expenses</dt><dd data-out="other_expenses">—</dd></div>
+      </dl>
+    </div>
+    <div class="card card-pad">
+      <dl class="kv">
+        <div class="kv-row"><dt>Landed cost per unit</dt><dd data-out="landed_per_unit" data-kind="npr2">—</dd></div>
+        <div class="kv-row"><dt>Gross profit per unit</dt><dd data-out="profit_per_unit" data-kind="npr2">—</dd></div>
+        <div class="kv-row"><dt>Gross profit for the whole order</dt><dd data-out="profit_per_order">—</dd></div>
+        <div class="kv-row"><dt>Gross margin</dt><dd data-out="margin_pct" data-kind="pct">—</dd></div>
+      </dl>
+      <p class="muted" style="font-size:12.5px;margin-top:10px">{{ gross_note }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/calculator.js' %}"></script>{% endblock %}

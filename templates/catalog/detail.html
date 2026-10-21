@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static smp %}
+{% block content %}
+<p class="muted" style="margin-bottom:14px"><a href="{% url 'catalog:explore' %}">Explore</a> / <a href="{% url 'catalog:explore' %}?category={{ p.category.slug }}">{{ p.category.name }}</a></p>
+
+<section class="detail-head" data-reveal>
+  {% include "partials/_thumb.html" %}
+  <div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="badge">{{ p.category.name }}</span>
+      {% if p.is_verified %}<span class="badge badge-verified">Verified data</span>{% else %}<span class="badge">Estimated data</span>{% endif %}
+    </div>
+    <h1>{{ p.name }}</h1>
+    <p class="muted" style="max-width:60ch">{{ p.description }}</p>
+    <div class="detail-actions">
+      <button class="btn {% if in_watchlist %}btn-soft{% else %}btn-brand{% endif %}" type="button" data-watch data-id="{{ p.pk }}" aria-pressed="{% if in_watchlist %}true{% else %}false{% endif %}">{% icon "heart" "icon icon-sm" %} Watchlist</button>
+      <button class="btn btn-ghost" type="button" data-compare data-id="{{ p.pk }}" aria-pressed="{% if in_compare %}true{% else %}false{% endif %}">{% icon "columns" "icon icon-sm" %} Compare</button>
+      <a class="btn btn-ghost" href="{% url 'finance:calculator' %}?unit_price_cny={{ p.supplier_price_cny }}&fx_rate={{ p.fx_rate }}&quantity={{ p.moq }}&shipping_npr={{ p.shipping_npr }}&insurance_handling_npr={{ p.handling_npr }}&duty_rate_pct={{ p.duty_rate_pct }}&other_expenses_npr={{ p.other_import_npr }}&selling_price_npr={{ p.selling_price_npr }}">{% icon "calculator" "icon icon-sm" %} Open in calculator</a>
+    </div>
+  </div>
+</section>
+
+<div class="notice" data-reveal style="margin-bottom:20px">{% icon "alert" %}<span><strong>Estimates, not quotes.</strong> {{ p.estimate_basis|default:"Supplier price, MOQ, shipping, duty and selling price are estimates." }} Gross profit is not net profit: advertising, marketplace fees, storage, returns and delivery will reduce what you earn.</span></div>
+
+<div class="detail-grid">
+  <div class="stack">
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Cost breakdown for the minimum order</h2><span class="sub">{{ p.moq }} units</span></div>
+      <div class="stackbar" role="img" aria-label="Share of each cost in the landed order total">
+        {% for label, val in cost_parts %}{% if b.landed_total %}<i class="seg-{{ forloop.counter0 }}" title="{{ label }}" data-bar-w="{% widthratio val b.landed_total 100 %}"></i>{% endif %}{% endfor %}
+      </div>
+      <dl class="kv">
+        <div class="kv-row"><dt>Supplier price</dt><dd>¥{{ p.supplier_price_cny }} × {{ b.fx_rate }} = {{ b.unit_price_npr|npr2 }} per unit</dd></div>
+        <div class="kv-row"><dt>Product cost ({{ p.moq }} × {{ b.unit_price_npr|npr2 }})</dt><dd>{{ b.purchase_cost|npr }}</dd></div>
+        <div class="kv-row"><dt>International shipping (est.)</dt><dd>{{ b.shipping|npr }}</dd></div>
+        <div class="kv-row"><dt>Insurance &amp; handling (est.)</dt><dd>{{ b.insurance_handling|npr }}</dd></div>
+        <div class="kv-row"><dt>Duties &amp; taxes (est. {{ p.duty_rate_pct }}%)</dt><dd>{{ b.duties_taxes|npr }}</dd></div>
+        <div class="kv-row"><dt>Other import expenses (est.)</dt><dd>{{ b.other_expenses|npr }}</dd></div>
+        <div class="kv-row total"><dt>Total landed investment</dt><dd>{{ b.landed_total|npr }}</dd></div>
+        <div class="kv-row"><dt>Landed cost per unit</dt><dd>{{ b.landed_per_unit|npr2 }}</dd></div>
+      </dl>
+      <p class="muted" style="font-size:12.5px;margin-top:10px">Exchange rate {{ b.fx_rate }} NPR per CNY is {% if p.fx_rate_cny_npr %}a custom rate set for this product{% elif FX_IS_LIVE %}a rate fetched {{ FX_FETCHED|date:"j M Y, H:i" }}{% else %}<strong>illustrative, not live</strong>{% endif %}. The duty rate is an estimate, not a verified customs rate for this product.</p>
+    </section>
+
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Profit at the minimum order</h2><span class="sub">Gross, before operating costs</span></div>
+      <dl class="kv">
+        <div class="kv-row"><dt>Est. selling price in Nepal</dt><dd>{{ b.selling_price|npr }}</dd></div>
+        <div class="kv-row"><dt>Gross profit per unit</dt><dd>{{ b.profit_per_unit|npr2 }}</dd></div>
+        <div class="kv-row"><dt>Gross profit for the order</dt><dd>{{ b.profit_per_order|npr }}</dd></div>
+        <div class="kv-row"><dt>Gross margin</dt><dd>{{ b.margin_pct|pct }}</dd></div>
+        <div class="kv-row"><dt>Break-even price per unit</dt><dd>{{ b.break_even_price|npr2 }}</dd></div>
+      </dl>
+      <h3 style="margin:22px 0 6px;font-size:16px">What if the selling price is different?</h3>
+      <p class="muted" style="font-size:13px;margin-bottom:6px">Selling price is the least certain input. Here is how profit moves if it lands above or below the estimate.</p>
+      <table class="data">
+        <thead><tr><th>Price change</th><th>Selling price</th><th>Profit / unit</th><th>Order profit</th><th>Margin</th></tr></thead>
+        <tbody>{% for s in scenarios %}<tr class="{% if s.base %}is-base{% endif %}"><td>{{ s.label }}</td><td>{{ s.result.selling_price|npr }}</td><td>{{ s.result.profit_per_unit|npr }}</td><td>{{ s.result.profit_per_order|npr }}</td><td>{{ s.result.margin_pct|pct }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </section>
+
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Why research this?</h2></div>
+      <p>{{ p.why_research|default:"No notes yet." }}</p>
+      <dl class="kv" style="margin-top:14px">
+        <div class="kv-row"><dt>Supplier country</dt><dd>{{ p.supplier_country }}</dd></div>
+        <div class="kv-row"><dt>Data source</dt><dd>{{ p.data_source.name|default:"Not recorded" }}</dd></div>
+        <div class="kv-row"><dt>Evidence status</dt><dd>{{ p.evidence_label }}</dd></div>
+        <div class="kv-row"><dt>Last updated</dt><dd>{{ p.updated_at|date:"j M Y" }}</dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <aside class="stack">
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Viability score</h2></div>
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:12px">
+        {% include "partials/_score_ring.html" with value=p.viability_score size="lg" %}
+        <div><strong style="font-size:17px">{{ p.score_label }}</strong><p class="muted" style="font-size:13px">Indicative research score. Not a prediction or guarantee of profit.</p></div>
+      </div>
+      {% for c in score.components %}
+      <div class="score-row">
+        <div class="score-top"><span>{{ c.label }} <span class="muted" style="font-weight:400">· {% widthratio c.weight 1 100 %}% weight</span></span><span>+{{ c.contribution }}</span></div>
+        <div class="bar {% if c.value < 45 %}warm{% endif %}"><i data-bar="{{ c.value }}"></i></div>
+        <div class="score-note">{{ c.note }}</div>
+      </div>
+      {% endfor %}
+      <p class="muted" style="font-size:12.5px;margin-top:12px"><a href="{% url 'research:methodology' %}">How scoring works</a></p>
+    </section>
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Market assumptions</h2></div>
+      <dl class="kv">
+        <div class="kv-row"><dt>Demand / trend score</dt><dd>{{ p.trend_score }}/100</dd></div>
+        <div class="kv-row"><dt>Competition</dt><dd><span class="badge {% if p.competition == 'high' %}lvl-high{% elif p.competition == 'low' %}lvl-low{% else %}lvl-med{% endif %}">{{ p.get_competition_display }}</span></dd></div>
+        <div class="kv-row"><dt>Import complexity</dt><dd><span class="badge {% if p.import_complexity == 'high' %}lvl-high{% elif p.import_complexity == 'low' %}lvl-low{% else %}lvl-med{% endif %}">{{ p.get_import_complexity_display }}</span></dd></div>
+        <div class="kv-row"><dt>Data confidence</dt><dd><span class="badge {% if p.confidence == 'high' %}lvl-low{% elif p.confidence == 'low' %}lvl-high{% else %}lvl-med{% endif %}">{{ p.get_confidence_display }}</span></dd></div>
+      </dl>
+      <p class="muted" style="font-size:12.5px;margin-top:10px">Trend and competition values are estimated judgments, not measured market signals.</p>
+    </section>
+  </aside>
+</div>
+
+{% if similar %}
+<section class="section" data-reveal>
+  <div class="card-head"><h2>More in {{ p.category.name }}</h2></div>
+  <div class="product-grid">{% for p in similar %}{% include "partials/_product_card.html" %}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  document.querySelectorAll("[data-bar-w]").forEach(function(el){
+    var w = el.dataset.barW; if (window.Motion && Motion.reduce) { el.style.width = w + "%"; return; }
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.style.width = w + "%"; }); });
+  });
+});
+</script>
+{% endblock %}

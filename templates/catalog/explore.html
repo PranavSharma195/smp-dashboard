@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static smp %}
+{% block content %}
+<div class="page-head" data-reveal>
+  <div>
+    <span class="eyebrow">Explore</span>
+    <h1>Explore products</h1>
+    <p>Browse products. The budget filters the <strong>total cost of the minimum order</strong>, because a cheap unit price can still hide an unaffordable MOQ.</p>
+  </div>
+  <button class="btn btn-ghost filter-toggle" type="button" data-filter-toggle>{% icon "filters" "icon icon-sm" %} Filters</button>
+</div>
+
+{% if used_saved %}<div class="notice info" style="margin-bottom:18px">{% icon "info" %}<span>Showing your saved filters. <a href="?q=" data-no-transition>Start fresh</a> or use <strong>Reset</strong> to clear.</span></div>{% endif %}
+
+<div class="explore">
+  <form class="card filters" method="get" action="{% url 'catalog:explore' %}" data-live-form data-api="{% url 'catalog:api' %}" data-floor="{{ budget_floor }}" data-ceiling="{{ budget_ceiling }}" data-default-sort="viability" aria-label="Product filters">
+    {% include "catalog/_filters_form.html" %}
+    <input type="hidden" name="sort" value="{{ sort }}" data-sort-mirror>
+    <div class="fgroup">
+      <button class="btn btn-brand" type="submit">Apply filters</button>
+      <button class="btn btn-ghost" type="button" data-reset>Reset filters</button>
+      <button class="btn btn-soft btn-sm" type="button" data-save-filters data-url="{% url 'catalog:save_filters' %}">{% icon "check" "icon icon-sm" %} Save as my default</button>
+      {% if has_saved %}<button class="btn btn-ghost btn-sm" type="button" id="clear-saved">Forget saved filters</button>{% endif %}
+    </div>
+  </form>
+
+  <section aria-live="polite">
+    <div class="results-bar">
+      <div class="results-count"><b data-result-count>{{ total }}</b> products <span class="muted">· avg margin <span data-result-avg>—</span></span></div>
+      <label class="sr-only" for="sort-select">Sort by</label>
+      <select id="sort-select" class="select sort-select" data-sort-select>
+        {% for key, label, order in sort_options %}<option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div data-live-results>{% include "catalog/_grid.html" %}</div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/live.js' %}"></script>
+<script>
+(function(){
+  // The sort dropdown lives outside the <form>; mirror it into the form and refresh.
+  document.addEventListener("DOMContentLoaded", function(){
+    var form = document.querySelector("[data-live-form]"), sel = document.querySelector("[data-sort-select]");
+    var mirror = form.querySelector("[data-sort-mirror]");
+    sel.addEventListener("change", function(){ mirror.value = sel.value; form.dispatchEvent(new Event("change", {bubbles:true})); });
+    document.querySelectorAll("[data-reset]").forEach(function(b){ b.addEventListener("click", function(){ sel.value = "viability"; mirror.value = "viability"; }); });
+    var cs = document.getElementById("clear-saved");
+    if (cs) cs.addEventListener("click", function(){
+      fetch("{% url 'catalog:clear_saved_filters' %}", {method:"POST", headers:{"X-CSRFToken": window.SMP.csrf(), "X-Requested-With":"fetch"}, credentials:"same-origin"})
+        .then(function(){ window.SMP.toast("Saved filters cleared."); cs.remove(); });
+    });
+    // top-bar search also drives the live list on this page
+    var top = document.querySelector(".topbar [data-live-q]"), side = form.querySelector("[data-live-q]");
+    if (top && side) {
+      top.value = side.value;
+      top.closest("form").addEventListener("submit", function(e){ e.preventDefault(); side.value = top.value; form.dispatchEvent(new Event("submit", {cancelable:true})); });
+    }
+  });
+})();
+</script>
+{% endblock %}

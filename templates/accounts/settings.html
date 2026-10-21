@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load smp %}
+{% block content %}
+<div class="page-head" data-reveal><div><span class="eyebrow">Account</span><h1>Settings</h1><p>Model assumptions in use, and your account security.</p></div></div>
+{% if using_demo_account %}<div class="notice" style="margin-bottom:20px" data-reveal>{% icon "alert" %}<span><strong>You're using the demo account.</strong> Change this password below, and before any deployment replace the demo credentials entirely.</span></div>{% endif %}
+<div class="grid-2" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+  <section class="card card-pad" data-reveal>
+    <div class="card-head"><h2>Change password</h2></div>
+    <form method="post" style="display:grid;gap:14px">{% csrf_token %}
+      {% for f in form %}<label class="field">{{ f.label }}{{ f }}{% for e in f.errors %}<small style="color:#8e1d17">{{ e }}</small>{% endfor %}</label>{% endfor %}
+      <button class="btn btn-brand" type="submit">Update password</button>
+    </form>
+  </section>
+  <div class="stack">
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Financial assumptions</h2></div>
+      <dl class="kv">
+        <div class="kv-row"><dt>CNY → NPR rate</dt><dd>{{ fx_rate }} {% if fx_live %}<span class="badge badge-verified">fetched {{ fx_fetched|date:"j M Y, H:i" }}</span>{% else %}<span class="badge badge-sample">illustrative</span>{% endif %}</dd></div>
+        <div class="kv-row"><dt>Rate source</dt><dd>{{ fx_source }}</dd></div>
+        <div class="kv-row"><dt>Default duty/tax for new products</dt><dd>{{ default_duty }}% <span class="badge badge-sample">estimate</span></dd></div>
+      </dl>
+      <form method="post" action="{% url 'accounts:refresh_fx' %}" style="margin-top:14px">{% csrf_token %}<button class="btn btn-brand btn-sm" type="submit">Fetch live exchange rate now</button></form>
+      <p class="muted" style="font-size:12px;margin-top:8px">Needs internet. Rates by <a href="{{ fx_attr_url }}" target="_blank" rel="noopener">Exchange Rate API</a>. This is a market mid-rate, not what a remittance agent or supplier will charge. Fetching recalculates every product.</p>
+      <p class="muted" style="font-size:13px;margin-top:10px">Change the fallback values in the <code>.env</code> file (see <code>.env.example</code>) or per product in Django Admin. They are not live rates and are not verified customs rules.</p>
+    </section>
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Viability score weights</h2></div>
+      {% for k, v in weights %}<div class="score-row"><div class="score-top"><span>{{ k|capfirst }}</span><span>{% widthratio v 1 100 %}%</span></div><div class="bar"><i data-bar="{% widthratio v 1 100 %}"></i></div></div>{% endfor %}
+      <p class="muted" style="font-size:12.5px;margin-top:10px">Edit <code>SMP_SCORE_WEIGHTS</code> in <code>config/settings.py</code>. <a href="{% url 'research:methodology' %}">Read the methodology</a>.</p>
+    </section>
+    <section class="card card-pad" data-reveal>
+      <div class="card-head"><h2>Saved filters</h2></div>
+      <p class="muted">{% if saved_filters %}<span class="kbd">{{ saved_filters }}</span>{% else %}None saved. Use “Save as my default” in Explore.{% endif %}</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% load smp %}
+<aside class="sidebar" aria-label="Primary">
+  <a class="brand" href="{% url 'dashboard:overview' %}">
+    <span class="brand-mark">{% icon "mountain" "icon icon-lg" %}</span>
+    <span class="brand-text"><span class="brand-name">SMP</span><span class="brand-sub">Product Intelligence</span></span>
+  </a>
+  <nav class="nav" aria-label="Main">
+    <span class="nav-indicator" aria-hidden="true"></span>
+    <span class="nav-label">Research</span>
+    <a class="nav-link {% if active == 'overview' %}is-active{% endif %}" href="{% url 'dashboard:overview' %}" {% if active == 'overview' %}aria-current="page"{% endif %}>{% icon "home" %}<span class="nav-text">Overview</span></a>
+    <a class="nav-link {% if active == 'explore' %}is-active{% endif %}" href="{% url 'catalog:explore' %}" {% if active == 'explore' %}aria-current="page"{% endif %}>{% icon "compass" %}<span class="nav-text">Explore Products</span></a>
+    <a class="nav-link {% if active == 'trending' %}is-active{% endif %}" href="{% url 'research:trending' %}" {% if active == 'trending' %}aria-current="page"{% endif %}>{% icon "flame" %}<span class="nav-text">Trending Now</span></a>
+    <a class="nav-link {% if active == 'budget' %}is-active{% endif %}" href="{% url 'catalog:budget_finder' %}" {% if active == 'budget' %}aria-current="page"{% endif %}>{% icon "wallet" %}<span class="nav-text">Budget Finder</span></a>
+    <span class="nav-label">Decide</span>
+    <a class="nav-link {% if active == 'compare' %}is-active{% endif %}" href="{% url 'watchlist:compare' %}" {% if active == 'compare' %}aria-current="page"{% endif %}>{% icon "columns" %}<span class="nav-text">Product Comparison</span></a>
+    <a class="nav-link {% if active == 'watchlist' %}is-active{% endif %}" href="{% url 'watchlist:list' %}" {% if active == 'watchlist' %}aria-current="page"{% endif %}>{% icon "heart" %}<span class="nav-text">My Watchlist</span><span class="nav-count" data-watch-count {% if not watch_count %}style="display:none"{% endif %}>{{ watch_count }}</span></a>
+    <a class="nav-link {% if active == 'calculator' %}is-active{% endif %}" href="{% url 'finance:calculator' %}" {% if active == 'calculator' %}aria-current="page"{% endif %}>{% icon "calculator" %}<span class="nav-text">Import Cost Calculator</span></a>
+    <span class="nav-label">Account</span>
+    <a class="nav-link {% if active == 'settings' %}is-active{% endif %}" href="{% url 'accounts:settings' %}" {% if active == 'settings' %}aria-current="page"{% endif %}>{% icon "settings" %}<span class="nav-text">Settings</span></a>
+  </nav>
+  <div class="side-foot">
+    <button class="side-toggle" type="button" data-side-toggle aria-label="Collapse or expand sidebar">{% icon "chevron" "icon icon-sm" %}<span>Collapse</span></button>
+  </div>
+</aside>

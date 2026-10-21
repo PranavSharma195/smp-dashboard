@@ -1,0 +1,22 @@
+{% load smp %}
+<header class="topbar">
+  <button class="icon-btn menu-btn" type="button" data-menu-btn aria-label="Open navigation">{% icon "menu" %}</button>
+  <h2 class="topbar-title">{{ page_title|default:"Overview" }}</h2>
+  <form class="search" role="search" action="{% url 'catalog:explore' %}" method="get">
+    {% icon "search" %}
+    <label class="sr-only" for="global-q">Search products</label>
+    <input id="global-q" data-live-q type="search" name="q" placeholder="Search products by name or description" autocomplete="off">
+  </form>
+  <div class="user-menu">
+    <button class="avatar-btn" type="button" aria-haspopup="true" aria-label="Account menu">
+      <span class="avatar">{{ request.user.username|slice:":1" }}</span>
+      <span class="user-name">{{ request.user.first_name|default:request.user.username }}</span>
+    </button>
+    <div class="menu-pop" role="menu">
+      <a href="{% url 'accounts:settings' %}" role="menuitem">{% icon "settings" "icon icon-sm" %} Settings</a>
+      {% if request.user.is_staff %}<a href="{% url 'admin:index' %}" role="menuitem" data-no-transition>{% icon "layers" "icon icon-sm" %} Manage data (admin)</a>{% endif %}
+      <hr>
+      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" role="menuitem">{% icon "logout" "icon icon-sm" %} Log out</button></form>
+    </div>
+  </div>
+</header>

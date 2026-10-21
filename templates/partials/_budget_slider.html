@@ -1,0 +1,28 @@
+{% load smp %}
+{# Params: lo, hi, floor, ceiling, step, presets (optional list of (lo, hi)), numbers (optional) #}
+<div class="budget" data-budget data-min="{{ floor }}" data-max="{{ ceiling }}" data-step="{{ step }}">
+  <div class="budget-values" aria-live="polite">
+    <div class="budget-val"><label for="b-lo-{{ uid }}">Minimum</label><output id="b-lo-{{ uid }}" data-lo-out>{{ lo|npr }}</output></div>
+    <span class="budget-dash" aria-hidden="true"></span>
+    <div class="budget-val"><label for="b-hi-{{ uid }}">Maximum</label><output id="b-hi-{{ uid }}" data-hi-out>{{ hi|npr }}</output></div>
+  </div>
+  <div class="range">
+    <div class="range-track"><div class="range-fill"></div></div>
+    <input class="range-in range-lo" type="range" min="{{ floor }}" max="{{ ceiling }}" step="{{ step }}" value="{{ lo }}" aria-label="Minimum total investment in rupees">
+    <input class="range-in range-hi" type="range" min="{{ floor }}" max="{{ ceiling }}" step="{{ step }}" value="{{ hi }}" aria-label="Maximum total investment in rupees">
+  </div>
+  <div class="range-ticks" aria-hidden="true"><span>{{ floor|npr }}</span><span>{{ 25000|npr }}</span><span>{{ 50000|npr }}</span><span>{{ 75000|npr }}</span><span>{{ ceiling|npr }}</span></div>
+  <input type="hidden" name="budget_min" value="{{ lo }}" data-lo-hidden>
+  <input type="hidden" name="budget_max" value="{{ hi }}" data-hi-hidden>
+  {% if numbers %}
+  <div class="two">
+    <label class="field">Min (Rs.)<input type="number" min="{{ floor }}" max="{{ ceiling }}" step="{{ step }}" value="{{ lo }}" data-lo-num></label>
+    <label class="field">Max (Rs.)<input type="number" min="{{ floor }}" max="{{ ceiling }}" step="{{ step }}" value="{{ hi }}" data-hi-num></label>
+  </div>
+  {% endif %}
+  {% if presets %}
+  <div class="presets" role="group" aria-label="Budget presets">
+    {% for a, b in presets %}<button type="button" class="chip" data-preset data-lo="{{ a }}" data-hi="{{ b }}">{{ a|compact }}–{{ b|compact }}</button>{% endfor %}
+  </div>
+  {% endif %}
+</div>

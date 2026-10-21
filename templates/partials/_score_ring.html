@@ -1,0 +1,4 @@
+<span class="ring {% if size %}{{ size }}{% endif %} {% if value < 45 %}low{% elif value < 65 %}mid{% endif %}" role="img" aria-label="Viability score {{ value }} out of 100">
+  <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="bg" cx="18" cy="18" r="15.9155" pathLength="100"/><circle class="fg" cx="18" cy="18" r="15.9155" pathLength="100" stroke-dasharray="{{ value }} 100" data-ring="{{ value }}"/></svg>
+  <b>{{ value }}</b>
+</span>

@@ -1,0 +1,41 @@
+{% load static smp %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ page_title|default:"Overview" }}{% endblock %} · {{ SITE_NAME }}</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <script>document.documentElement.className += " js"; setTimeout(function(){document.documentElement.classList.add("reveal-done");}, 2500);</script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="app-body">
+<div class="app">
+  {% include "partials/_sidebar.html" %}
+  <div class="scrim"></div>
+  <div class="main">
+    {% include "partials/_topbar.html" %}
+    <main class="page" id="content">
+      {% if messages %}
+      <div class="messages">
+        {% for m in messages %}<div class="notice {% if m.tags == 'success' %}good{% elif m.tags == 'error' %}bad{% endif %}" role="status">{{ m }}</div>{% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+{% include "partials/_compare_drawer.html" %}
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="{% static 'vendor/gsap.min.js' %}"></script>
+<script>window.gsap || document.write('<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"><\/script>')</script>
+{% block vendor_scripts %}{% endblock %}
+<script src="{% static 'js/motion.js' %}"></script>
+<script src="{% static 'js/app.js' %}"></script>
+<script src="{% static 'js/budget-slider.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

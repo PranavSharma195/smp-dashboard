@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load smp %}
+{% block content %}
+<div class="page-head" data-reveal><div><span class="eyebrow">Compare</span><h1>Side by side</h1><p>Compare up to {{ max_items }} products. The best value in each row is highlighted.</p></div>
+  {% if products %}<form method="post" action="{% url 'watchlist:compare_clear' %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Clear comparison</button></form>{% endif %}</div>
+
+{% if products|length >= 1 %}
+<div class="card compare-wrap" data-reveal>
+<table class="compare">
+  <thead><tr><th></th>
+    {% for p in products %}<th><div class="cmp-head">{% include "partials/_thumb.html" %}<strong><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></strong>
+      <div style="display:flex;gap:6px"><button type="button" class="icon-btn" data-watch data-id="{{ p.pk }}" aria-pressed="{% if p.pk in watch_ids %}true{% else %}false{% endif %}" aria-label="Watch {{ p.name }}">{% icon "heart" "icon icon-sm" %}</button><button type="button" class="icon-btn" data-compare data-id="{{ p.pk }}" aria-pressed="true" aria-label="Remove {{ p.name }} from comparison">{% icon "x" "icon icon-sm" %}</button></div></div></th>{% endfor %}
+  </tr></thead>
+  <tbody>
+    {% for row in rows %}<tr><th scope="row">{{ row.label }}</th>
+      {% for c in row.cells %}<td class="{% if c.best %}best{% endif %}">
+        {% if row.kind == "money" %}{{ c.value|npr }}{% elif row.kind == "pct" %}{{ c.value|pct }}{% elif row.kind == "cny" %}¥{{ c.value }}{% elif row.kind == "level" %}<span class="badge {% if c.value == 'high' %}lvl-high{% elif c.value == 'low' %}lvl-low{% else %}lvl-med{% endif %}">{{ c.value|capfirst }}</span>{% else %}{{ c.value }}{% endif %}
+      </td>{% endfor %}</tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="muted" style="font-size:12.5px;margin-top:12px">Competition “high” and confidence “low” are riskier; the highlight only marks numeric best values. Gross profit is not net profit, and all figures are estimates.</p>
+{% else %}
+<div class="empty" data-reveal>
+  <svg class="art" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="12" y="14" width="42" height="62" rx="6"/><rect x="66" y="14" width="42" height="62" rx="6"/></svg>
+  <h3>Pick products to compare</h3>
+  <p>Use the compare button on any product card. You can compare up to {{ max_items }}.</p>
+  <a class="btn btn-brand" href="{% url 'catalog:explore' %}">Explore products</a>
+</div>
+{% endif %}
+{% endblock %}

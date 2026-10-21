@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static smp %}
+{% block content %}
+
+<section class="hero" data-hero-budget data-api="{% url 'dashboard:summary' %}" data-reveal>
+  <div>
+    <span class="eyebrow">Budget</span>
+    <h1>How much can you put into a first order?</h1>
+    <p class="hero-lead">Slide to your range. We filter on the <strong>total landed cost of the minimum order</strong>, not just the unit price.</p>
+    <div style="margin-top:22px">
+      {% include "partials/_budget_slider.html" with lo=budget_lo hi=budget_hi floor=budget_floor ceiling=budget_ceiling step=budget_step uid="hero" %}
+    </div>
+  </div>
+  <div class="hero-result">
+    <div class="muted" style="font-weight:600">Products within budget</div>
+    <div><span class="hero-count" data-hero-count>{{ stats.in_budget }}</span> <span class="muted">of <span data-hero-total>{{ stats.total }}</span></span></div>
+    <ul class="pick-list" data-pick-list>
+      {% for p in top|slice:":3" %}<li><a href="{{ p.get_absolute_url }}">{{ p.name }}</a><span class="muted num">{{ p.landed_total_npr|npr }}</span></li>{% endfor %}
+    </ul>
+    <a class="btn btn-brand btn-sm" style="margin-top:16px" data-hero-link data-base="{% url 'catalog:explore' %}" href="{% url 'catalog:explore' %}?budget_min={{ budget_lo }}&budget_max={{ budget_hi }}">See all in Explore {% icon "arrow" "icon icon-sm" %}</a>
+  </div>
+</section>
+
+<section class="stat-band" data-reveal aria-label="Key figures">
+  <div class="stat"><div class="stat-label">Products tracked</div><div class="stat-value" data-count="{{ stats.total }}">0</div><div class="stat-sub">in the database</div></div>
+  <div class="stat"><div class="stat-label">Trending (score ≥ {{ threshold }})</div><div class="stat-value" data-count="{{ stats.trending }}">0</div><div class="stat-sub">by trend score</div></div>
+  <div class="stat"><div class="stat-label">Within your budget</div><div class="stat-value" data-stat-budget>{{ stats.in_budget }}</div><div class="stat-sub">total MOQ investment</div></div>
+  <div class="stat"><div class="stat-label">Top profit per unit</div><div class="stat-value" data-count="{{ stats.best_profit|floatformat:0 }}" data-format="npr">Rs. 0</div><div class="stat-sub">{% if stats.best_product %}{{ stats.best_product.name|truncatechars:26 }}{% endif %}</div></div>
+  <div class="stat"><div class="stat-label">Average gross margin</div><div class="stat-value" data-count="{{ stats.avg_margin|floatformat:1 }}" data-format="pct">0%</div><div class="stat-sub">before operating costs</div></div>
+</section>
+
+<div class="grid-2">
+  <section class="card card-pad" data-reveal>
+    <div class="card-head"><h2>Category mix</h2></div>
+    <div class="chart-box short" id="chart-categories"><canvas aria-label="Products by category" role="img"></canvas></div>
+    <div class="legend">
+      {% for c in by_cat %}<div class="legend-row"><span class="legend-dot" data-dot="{{ forloop.counter0 }}"></span><span>{{ c.name }}</span><span class="muted num">{{ c.n }}</span></div>{% endfor %}
+    </div>
+  </section>
+  <section class="card card-pad" data-reveal>
+    <div class="card-head"><h2>Landed cost vs. selling price</h2><span class="sub">per unit · top 8 by viability</span></div>
+    <div class="chart-box" id="chart-costs" style="height:420px"><canvas aria-label="Landed cost per unit compared with estimated selling price" role="img"></canvas></div>
+  </section>
+</div>
+
+<div class="grid-feature">
+  <section data-reveal>
+    {% with f=top.0 %}{% if f %}
+    <div class="feature-pick">
+      {% with p=f %}{% include "partials/_thumb.html" %}{% endwith %}
+      <div>
+        <span class="eyebrow">Most promising</span>
+        <h3><a href="{{ f.get_absolute_url }}" style="color:inherit">{{ f.name }}</a></h3>
+        <p class="why">{{ f.why_research }}</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          {% include "partials/_score_ring.html" with value=f.viability_score %}
+          <span class="badge">{{ f.landed_total_npr|npr }} to start</span><span class="badge">{{ f.margin_pct|pct:0 }} gross margin</span>
+        </div>
+      </div>
+    </div>
+    {% endif %}{% endwith %}
+    <div class="card card-pad" style="margin-top:20px">
+      <div class="card-head"><h2>Shortlist</h2><a href="{% url 'catalog:explore' %}" class="sub">View all</a></div>
+      <div class="row-list">
+        {% for p in top %}<a class="row-item" href="{{ p.get_absolute_url }}"><span class="rank">{{ forloop.counter }}</span><span><span class="row-title">{{ p.name }}</span><span class="row-sub">{{ p.category.name }} · {{ p.landed_total_npr|npr }} · {{ p.margin_pct|pct:0 }} margin</span><span class="bar"><i data-bar="{{ p.viability_score }}"></i></span></span><b class="num">{{ p.viability_score }}</b></a>{% endfor %}
+      </div>
+    </div>
+  </section>
+  <section class="card card-pad" data-reveal>
+    <div class="card-head"><h2>Opportunity ranking</h2><span class="sub">by trend score</span></div>
+    <p class="muted" style="font-size:13px">Ranked by the demand score. Each line says what is driving it, and what to watch.</p>
+    <div class="row-list">
+      {% for p in ranking %}<a class="row-item" href="{{ p.get_absolute_url }}"><span class="rank">{{ forloop.counter }}</span><span><span class="row-title">{{ p.name }}</span><span class="row-sub">Trend {{ p.trend_score }} · {{ p.get_competition_display }} competition · {{ p.margin_pct|pct:0 }} margin{% if p.competition == "high" %} · crowded market{% elif p.trend_score >= 75 and p.competition != "high" %} · strong demand, manageable competition{% endif %}</span><span class="bar warm"><i data-bar="{{ p.trend_score }}"></i></span></span><b class="num">{{ p.trend_score }}</b></a>{% endfor %}
+    </div>
+  </section>
+</div>
+
+<section class="section" data-reveal>
+  <div class="card-head"><h2>Recently added</h2><a href="{% url 'catalog:explore' %}?sort=recent" class="sub">See more</a></div>
+  <div class="scroller">
+    {% for p in recent %}<a class="mini" href="{{ p.get_absolute_url }}">{% include "partials/_thumb.html" %}<span class="mini-name">{{ p.name }}</span><span class="muted num" style="font-size:13px">{{ p.landed_total_npr|npr }} · {{ p.margin_pct|pct:0 }}</span></a>{% endfor %}
+  </div>
+</section>
+<p class="muted" style="font-size:12.5px;margin-top:10px">Gross profit is not net profit. Exchange rate of {{ FX_RATE }} NPR per CNY is illustrative, not live. Duty and tax rates are estimates.</p>
+
+<script type="application/json" id="chart-data">{{ chart_json|safe }}</script>
+{% endblock %}
+{% block vendor_scripts %}
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
+<script>window.Chart || document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"><\/script>')</script>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/charts.js' %}"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  var P = ["#0d6b5e","#e39a2d","#3949a3","#b3261e","#6a4c93","#4d6b2f","#a34a5f","#c9772a","#2fa28d","#6d7fd6","#8a8a99","#d9808f"];
+  document.querySelectorAll("[data-dot]").forEach(function(d){ d.style.background = P[+d.dataset.dot % P.length]; });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% load static smp %}<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · {{ SITE_NAME }}</title>
+<link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head><body>
+<div class="auth">
+  <section class="auth-art">
+    <a class="brand" href="/"><span class="brand-mark">{% icon "mountain" "icon icon-lg" %}</span><span class="brand-text"><span class="brand-name">SMP</span><span class="brand-sub">Product Intelligence</span></span></a>
+    <div style="position:relative;z-index:1">
+      <h1>Find what's worth importing.</h1>
+      <p>Research products for the Nepali market, see the real cost of the minimum order, and compare before you commit.</p>
+    </div>
+    <svg class="peaks" viewBox="0 0 800 160" preserveAspectRatio="none" aria-hidden="true"><path d="M0 160 L0 110 L120 40 L210 100 L320 20 L450 110 L560 55 L680 105 L800 60 L800 160Z" fill="rgba(253,246,230,.12)"/><path d="M0 160 L0 130 L90 90 L200 135 L330 80 L470 140 L600 95 L720 135 L800 110 L800 160Z" fill="rgba(253,246,230,.18)"/></svg>
+  </section>
+  <section class="auth-form">
+    <div class="auth-card">
+      <div><span class="eyebrow">Welcome back</span><h2>Sign in</h2></div>
+      {% if form.errors %}<div class="notice bad" role="alert">{% icon "alert" %}<span>{% for e in form.non_field_errors %}{{ e }}{% empty %}Please enter your username and password.{% endfor %}</span></div>{% endif %}
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <label class="field">Username {{ form.username }}</label>
+        <label class="field">Password {{ form.password }}</label>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn-brand" type="submit">Sign in {% icon "arrow" "icon icon-sm" %}</button>
+      </form>
+      <p class="auth-foot">Access is for the account owner only.</p>
+    </div>
+  </section>
+</div></body></html>

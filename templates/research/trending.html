@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load smp %}
+{% block content %}
+<div class="page-head" data-reveal><div><span class="eyebrow">Trending Now</span><h1>Highest demand scores</h1><p>Ranked by the demand/trend score stored for each product.</p></div><a class="btn btn-ghost" href="{% url 'research:methodology' %}">{% icon "info" "icon icon-sm" %} How this works</a></div>
+<div class="product-grid" data-reveal-group>
+  {% for p in products %}<div data-reveal>{% include "partials/_product_card.html" %}</div>{% endfor %}
+</div>
+{% endblock %}

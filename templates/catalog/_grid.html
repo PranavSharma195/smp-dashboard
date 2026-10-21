@@ -1,0 +1,22 @@
+{% load smp %}
+{% if products %}
+<div class="product-grid">
+  {% for p in products %}{% include "partials/_product_card.html" %}{% endfor %}
+</div>
+{% if page.paginator.num_pages > 1 %}
+<nav class="pager" aria-label="Pagination">
+  {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}" data-page="{{ page.previous_page_number }}" aria-label="Previous page">&larr;</a>{% endif %}
+  {% for n in page.paginator.page_range %}
+    {% if n == page.number %}<span class="is-current" aria-current="page">{{ n }}</span>{% else %}<a href="?page={{ n }}" data-page="{{ n }}">{{ n }}</a>{% endif %}
+  {% endfor %}
+  {% if page.has_next %}<a href="?page={{ page.next_page_number }}" data-page="{{ page.next_page_number }}" aria-label="Next page">&rarr;</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="empty">
+  <svg class="art" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 74l28-36 20 26 14-16 38 26z"/><circle cx="86" cy="24" r="9"/></svg>
+  <h3>No products match these filters</h3>
+  <p>Try widening the budget range, lowering the minimum margin, or clearing a filter. Remember the budget applies to the <strong>total MOQ investment</strong>, not the unit price.</p>
+  <button type="button" class="btn btn-brand" data-clear>Clear all filters</button>
+</div>
+{% endif %}

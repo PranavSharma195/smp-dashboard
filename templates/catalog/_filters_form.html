@@ -1,0 +1,50 @@
+{% load smp %}
+{# Shared filter fields. Context: filters (dict), categories, levels, sort_options, sort #}
+<div class="fgroup">
+  <h3>Search</h3>
+  <input type="search" name="q" value="{{ filters.q|default:'' }}" placeholder="Name or description" aria-label="Search products" data-live-q>
+</div>
+<div class="fgroup">
+  <h3>Total MOQ investment</h3>
+  {% include "partials/_budget_slider.html" with lo=filters.budget_min|default:budget_floor hi=filters.budget_max|default:budget_ceiling floor=budget_floor ceiling=budget_ceiling step=budget_step uid="f" numbers=True %}
+  <p class="budget-explain">{% icon "info" "icon icon-sm" %}<span>Landed cost of the <strong>whole minimum order</strong> (product + shipping + duty + other).</span></p>
+</div>
+<div class="fgroup">
+  <h3>Cost per unit (landed)</h3>
+  <div class="two">
+    <label class="field">Min Rs.<input type="number" name="unit_min" min="0" step="10" value="{{ filters.unit_min|default:'' }}"></label>
+    <label class="field">Max Rs.<input type="number" name="unit_max" min="0" step="10" value="{{ filters.unit_max|default:'' }}"></label>
+  </div>
+</div>
+<div class="fgroup">
+  <h3>MOQ (units)</h3>
+  <div class="two">
+    <label class="field">Min<input type="number" name="moq_min" min="0" value="{{ filters.moq_min|default:'' }}"></label>
+    <label class="field">Max<input type="number" name="moq_max" min="0" value="{{ filters.moq_max|default:'' }}"></label>
+  </div>
+</div>
+<div class="fgroup">
+  <h3>Category</h3>
+  <select name="category" aria-label="Category">
+    <option value="">All categories</option>
+    {% for c in categories %}<option value="{{ c.slug }}" {% if filters.category == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+</div>
+<div class="fgroup">
+  <h3>Returns &amp; demand</h3>
+  <div class="two">
+    <label class="field">Min margin %<input type="number" name="margin_min" step="1" value="{{ filters.margin_min|default:'' }}"></label>
+    <label class="field">Min profit/unit<input type="number" name="profit_min" step="10" value="{{ filters.profit_min|default:'' }}"></label>
+    <label class="field">Min trend (0–100)<input type="number" name="trend_min" min="0" max="100" value="{{ filters.trend_min|default:'' }}"></label>
+    <label class="field">Min viability<input type="number" name="viability_min" min="0" max="100" value="{{ filters.viability_min|default:'' }}"></label>
+  </div>
+</div>
+<div class="fgroup">
+  <h3>Risk</h3>
+  <div class="two">
+    <label class="field">Competition
+      <select name="competition"><option value="">Any</option>{% for v, l in levels %}<option value="{{ v }}" {% if filters.competition == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></label>
+    <label class="field">Confidence
+      <select name="confidence"><option value="">Any</option>{% for v, l in levels %}<option value="{{ v }}" {% if filters.confidence == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></label>
+  </div>
+</div>

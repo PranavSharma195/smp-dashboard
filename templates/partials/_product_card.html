@@ -1,0 +1,23 @@
+{% load smp %}
+<article class="pcard" data-product="{{ p.pk }}">
+  <div class="pcard-badges">{% if p.is_verified %}<span class="badge badge-verified">Verified</span>{% else %}<span class="badge">Estimated</span>{% endif %}</div>
+  {% include "partials/_thumb.html" %}
+  <div class="pcard-body">
+    <div><span class="pcard-cat">{{ p.category.name }}</span>
+      <h3 class="pcard-title"><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h3></div>
+    <div class="money-pair">
+      <div><div class="k">MOQ order total</div><div class="v">{{ p.landed_total_npr|npr }}</div><div class="s">{{ p.moq }} units, landed</div></div>
+      <div><div class="k">Per unit</div><div class="v">{{ p.landed_per_unit_npr|npr }}</div><div class="s">sells ~{{ p.selling_price_npr|npr }}</div></div>
+    </div>
+  </div>
+  <div class="pcard-foot">
+    <div style="display:flex;align-items:center;gap:10px">
+      {% include "partials/_score_ring.html" with value=p.viability_score %}
+      <span class="margin-chip {% if p.margin_pct < 0 %}neg{% elif p.margin_pct < 30 %}low{% endif %}" title="Estimated gross margin">{{ p.margin_pct|pct:0 }}</span>
+    </div>
+    <div class="pcard-actions">
+      <button type="button" class="icon-btn is-compare" data-compare data-id="{{ p.pk }}" aria-pressed="{% if p.pk in compare_ids %}true{% else %}false{% endif %}" aria-label="Compare {{ p.name }}" title="Compare">{% icon "columns" "icon icon-sm" %}</button>
+      <button type="button" class="icon-btn" data-watch data-id="{{ p.pk }}" aria-pressed="{% if p.pk in watch_ids %}true{% else %}false{% endif %}" aria-label="Watch {{ p.name }}" title="Add to watchlist">{% icon "heart" "icon icon-sm" %}</button>
+    </div>
+  </div>
+</article>

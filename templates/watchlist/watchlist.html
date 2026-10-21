@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load smp %}
+{% block content %}
+<div class="page-head" data-reveal><div><span class="eyebrow">Watchlist</span><h1>My watchlist</h1><p>Products you're considering. Total of all minimum orders if you bought every one: <strong>{{ total_invest|npr }}</strong>.</p></div></div>
+
+{% if items %}
+<div class="product-grid">
+  {% for it in items %}<div data-watch-row>{% with p=it.product %}{% include "partials/_product_card.html" %}{% endwith %}</div>{% endfor %}
+</div>
+{% else %}
+<div class="empty" data-reveal>
+  <svg class="art" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M60 78C20 52 14 30 30 20c12-7 24 0 30 10 6-10 18-17 30-10 16 10 10 32-30 58z"/></svg>
+  <h3>Nothing on your watchlist yet</h3>
+  <p>Tap the heart on any product to keep it here for later.</p>
+  <a class="btn btn-brand" href="{% url 'catalog:explore' %}">Explore products</a>
+</div>
+{% endif %}
+
+<section class="section card card-pad" data-reveal>
+  <div class="card-head"><h2>Low investment or higher return?</h2><span class="sub">{% if tradeoff.from_watchlist %}Among your watchlist{% else %}Among all products{% endif %}</span></div>
+  {% if tradeoff and not tradeoff.same %}
+  <div class="tradeoff">
+    <div class="side"><span class="eyebrow">Lowest investment</span><h4>{{ tradeoff.cheapest.name }}</h4><p>Start with <b>{{ tradeoff.cheapest.landed_total_npr|npr }}</b>. Gross profit on the order: {{ tradeoff.cheapest.profit_per_order_npr|npr }}.</p><p class="muted" style="font-size:13px">Less cash at risk and easier to test, but a lower ceiling on earnings per order.</p></div>
+    <span class="vs">vs</span>
+    <div class="side"><span class="eyebrow">Highest order profit</span><h4>{{ tradeoff.top_return.name }}</h4><p>Needs <b>{{ tradeoff.top_return.landed_total_npr|npr }}</b>. Gross profit on the order: {{ tradeoff.top_return.profit_per_order_npr|npr }}.</p><p class="muted" style="font-size:13px">Bigger potential return, but more capital tied up if demand or price assumptions are wrong.</p></div>
+  </div>
+  {% elif tradeoff %}
+  <p>One product is both the cheapest to start and the highest earner here: <b>{{ tradeoff.cheapest.name }}</b>. Check its confidence level before relying on that.</p>
+  {% else %}<p class="muted">Add two or more products to see the trade-off.</p>{% endif %}
+  <p class="muted" style="font-size:12.5px;margin-top:12px">All figures are gross and estimated. A smaller first order limits what you can lose while you learn what actually sells.</p>
+</section>
+
+<section class="section" data-reveal>
+  <div class="card-head"><h2>Shortlist: top viability</h2></div>
+  <div class="scroller">{% for p in shortlist %}<a class="mini" href="{{ p.get_absolute_url }}">{% include "partials/_thumb.html" %}<span class="mini-name">{{ p.name }}</span><span class="muted num" style="font-size:13px">{{ p.landed_total_npr|npr }} · score {{ p.viability_score }}</span></a>{% endfor %}</div>
+</section>
+{% endblock %}

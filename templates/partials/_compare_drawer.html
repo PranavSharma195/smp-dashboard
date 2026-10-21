@@ -1,0 +1,10 @@
+{% load smp %}
+{% if request.user.is_authenticated %}
+<div class="drawer" id="compare-drawer" data-clear-url="{% url 'watchlist:compare_clear' %}" role="region" aria-label="Product comparison tray" aria-hidden="true">
+  <span class="drawer-title">Comparing</span>
+  <div class="drawer-chips"></div>
+  <button class="btn btn-ghost btn-sm" type="button" data-compare-clear>Clear</button>
+  <a class="btn btn-sm" data-compare-go href="{% url 'watchlist:compare' %}">Compare</a>
+</div>
+<script type="application/json" id="compare-initial">[{% for p in compare_items %}{"id": {{ p.pk }}, "name": "{{ p.name|escapejs }}", "slug": "{{ p.slug }}"}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
+{% endif %}
